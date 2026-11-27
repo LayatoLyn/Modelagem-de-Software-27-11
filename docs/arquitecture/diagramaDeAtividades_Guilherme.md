@@ -1,6 +1,7 @@
 ```mermaid
 flowchart TD
-
+    %% Comentário de Nicolas: O código está apresentando o erro "Unable to render rich display" ao tentar rodar pelo github
+    
     %% RAIA 1: representa as atividades executadas pelos sensores IoT.
     %% Os sensores coletam os dados e os encaminham à plataforma.
     subgraph R1["RAIA 1 - SENSORES IoT"]
