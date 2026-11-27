@@ -7,7 +7,7 @@ subgraph IoT Preventiva
 
     %% Etapa de telemetria: coleta, armazenamento e análise dos dados da máquina.
     subgraph Telemetria
-        S[Sensor] %% Coleta informações da máquina.
+        S[Sensor] ## Coleta informações da máquina.
         A[Analise] %% Analisa os dados recebidos e identifica possíveis anormalidades.
         Sis[Sistema] %% Apresenta os dados para acompanhamento.
         B[Banco de dados] %% Armazena os dados coletados para consultas futuras.
