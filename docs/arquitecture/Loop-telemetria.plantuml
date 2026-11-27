@@ -1,19 +1,65 @@
 @startuml
 
-actor Sensor
-participant "Gateway" as GT
-participant "Plataforma IoT" as Iot
-participant "Analisador Preditivo" as AP
-participant "Gestor de Manutenção" as GM
-participant "Sistema de Ordens de Serviço" as SOS
 
-Sensor -> GT : envia dados do sensor
-GT -> Iot : Publica telemetria
-Iot -> AP : Encaminha dados para análise
-AP -> AP : Avalia padrões e tendencias de falha
-AP -> GM : Notifica necessidade de manutençao preventiva 
-GM -> SOS : Cria ordem de serviço
-SOS -> GM : Confirma criação da OS
-SOS -> AP : Atualiza status da manutenção
-AP -> Iot : Registra telemetria normal
+sequenceDiagram
+    autonumber
+
+    participant S as Sensores IoT
+    participant E as EMQX (MQTT)
+    participant K as Apache Kafka
+    participant A as Analisador Preditivo
+    participant DB as TimescaleDB
+    participant G as Grafana
+    actor T as Técnico
+
+    loop Monitoramento contínuo da máquina
+
+        S->>S: Coletar temperatura e vibração
+        S-)E: Publicar telemetria (TelemetriaDTO)
+
+        E->>E: Validar recebimento da mensagem
+
+        alt Dados recebidos corretamente
+
+            E-)K: Encaminhar telemetria
+            K-)A: Entregar dados para análise
+
+            A->>A: Validar dados recebidos
+            A->>DB: Consultar dados históricos
+            DB-->>A: Retornar histórico da máquina
+
+            A->>A: Comparar dados atuais com históricos
+            A->>A: Executar algoritmo de análise
+
+            A->>DB: Armazenar telemetria atual
+
+            alt Anomalia identificada
+
+                A->>A: Identificar nível de risco
+                A->>DB: Registrar alerta e informações da anomalia
+                DB-->>A: Confirmar registro
+
+                A-)G: Disponibilizar alerta para visualização
+                G->>T: Exibir alerta no dashboard
+
+            else Nenhuma anomalia identificada
+
+                A->>DB: Registrar resultado da análise
+                DB-->>A: Confirmar armazenamento
+
+            end
+
+            G->>DB: Consultar dados atualizados
+            DB-->>G: Retornar dados de monitoramento
+            G->>T: Atualizar gráficos e indicadores
+
+        else Falha no recebimento dos dados
+
+            E->>E: Registrar erro de recebimento
+            Note over E,K: A mensagem não segue para análise
+
+        end
+
+    end
+
 @enduml
